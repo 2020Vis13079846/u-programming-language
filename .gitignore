@@ -1,0 +1,15 @@
+
+# Prerequisites
+*.d
+
+# Object files
+*.o
+
+# Libraries
+*.a
+
+# Shared objects
+*.so
+
+# Executables
+universe
