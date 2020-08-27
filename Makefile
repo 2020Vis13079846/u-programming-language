@@ -1,10 +1,10 @@
 all: clean build test
 
 build:
-	@gcc main.c -o universe
+	@gcc main.c -o u
 
 test:
-	@./universe test.u
+	@./u test.u
 
 clean:
-	@rm -rf parser.tab.c lex.yy.c universe
+	@rm -f u
