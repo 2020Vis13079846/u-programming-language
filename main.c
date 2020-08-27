@@ -3,20 +3,16 @@
 #include <string.h>
 #include <sys/stat.h>
 
-int main(int argc, char *argv[]) {
+char *read_file(char *filename) {
   struct stat st;
   FILE *file;
   char *buffer;
   int size;
-  if (argc < 2) {
-    printf("Usage: %s <filename>\n", argv[0]);
-    return 0;
+  if (stat(filename, &st)) {
+    perror(filename);
+    exit(1);
   }
-  if (stat(argv[1], &st)) {
-    perror(argv[1]);
-    return 1;
-  }
-  file = fopen(argv[1], "r");
+  file = fopen(filename, "r");
   fseek(file, 0, SEEK_END);
   size = ftell(file);
   rewind(file);
@@ -24,6 +20,15 @@ int main(int argc, char *argv[]) {
   memset(buffer, 0, sizeof(char) * size);
   fread(buffer, size-1, sizeof(char), file);
   fclose(file);
+  return buffer;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    printf("Usage: %s <filename>\n", argv[0]);
+    return 0;
+  }
+  char *buffer = read_file(argv[1]);
   printf("%s\n", buffer);
   return 0;
 }
