@@ -4,7 +4,7 @@ build:
 	@gcc main.c -o u
 
 test:
-	@./u test.u
+	@./u
 
 clean:
 	@rm -f u
