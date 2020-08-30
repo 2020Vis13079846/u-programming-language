@@ -43,12 +43,11 @@ int get_token() {
 		}
 		return tok_number;
 	}
-        i++;
-	return code[i-1];
+	return code[i++];
 }
 
 int main() {
-	code = "print (1);";
+	code =  "print (1);";
 	while (code[i]) {
 		printf("(token_type = %d)\n", get_token());
 	}
