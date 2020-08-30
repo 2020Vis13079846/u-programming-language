@@ -4,11 +4,10 @@
 #include <ctype.h>
 
 enum token_type {
-	tok_eof = -1,
-	tok_print = -2,
-	tok_identifier = -3,
-	tok_number = -4,
-	tok_endofline = -5,
+	tok_eof = 1,
+	tok_print = 2,
+	tok_identifier = 3,
+	tok_number = 4,
 };
 
 char *code;
@@ -20,10 +19,6 @@ int get_token() {
 	}
 	while (code[i] == ' ' || code[i] == '\n') {
 		i++;
-	}
-	if (code[i] == ';') {
-		i++;
-		return tok_endofline;
 	}
 	if (code[i] == '#') {
 		while (code[i] && code[i] != '\n' && code[i] != EOF) {
@@ -48,15 +43,13 @@ int get_token() {
 		}
 		return tok_number;
 	}
-	return 0;
+        i++;
+	return code[i-1];
 }
 
 int main() {
-	code = "print 1;";
+	code = "print (1);";
 	while (code[i]) {
 		printf("(token_type = %d)\n", get_token());
 	}
-	/*for (int i = 0; ; i++) {
-		printf("(struct token type=%d attribute=%d)\n", tokens[i].type, tokens[i].attribute);
-	}*/
 }
