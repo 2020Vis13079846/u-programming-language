@@ -3,79 +3,60 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-struct token {
-	int type;
-	int attribute;
+enum token_type {
+	tok_eof = -1,
+	tok_print = -2,
+	tok_identifier = -3,
+	tok_number = -4,
+	tok_endofline = -5,
 };
 
-enum {
-	OPERATOR1,
-	OPERATOR2,
-	ASSIGN,
-	SEMICOLON,
-	NUMBER,
-	ID,
-} type;
+char *code;
+int i = 0;
 
-enum {
-	ADD,
-	SUB,
-	MUL,
-	DIV,
-} attribute;
-
-char *symbols[1024];
-int size = 0;
-
-struct token *lexer(char *text) {
-	struct token token;
-	for (int i = 0; i < strlen(text); i++) {
-		if (text[i] == ' ' || text[i] == '\n') {
-			continue;
-		}
-		if (text[i] == '+') {
-			token.type = OPERATOR1;
-			token.attribute = ADD;
-		} else if (text[i] == '-') {
-			token.type = OPERATOR1;
-			token.attribute = SUB;
-		} else if (text[i] == '*') {
-			token.type = OPERATOR2;
-			token.attribute = MUL;
-		} else if (text[i] == '/') {
-			token.type = OPERATOR2;
-			token.attribute = DIV;
-		} else if (text[i] == '=') {
-			token.type = ASSIGN;
-		} else if (text[i] == ';') {
-			token.type = SEMICOLON;
-		} else {
-			if (isalpha(text[i])) {
-				char *id = (char *)malloc(sizeof(char)*1024);
-				int length = 0;
-				while (isdigit(text[i]) || isalpha(text[i])) {
-					id[length++] = text[i++];
-				}
-				symbols[size] = id;
-				token.type = ID;
-				token.attribute = size;
-				size++;
-			} else if (isdigit(text[i])) {
-				int value = 0;
-				while (isdigit(text[i])) {
-					value = value * 10 + (text[i] - '0');
-					i++;
-				}
-				token.type = NUMBER;
-				token.attribute = value;
-			}
-			i--;
-		}
-		printf("(struct token type=%d attribute=%d)\n", token.type, token.attribute);
+int get_token() {
+	if (!code[i]) {
+		return tok_eof;
 	}
+	while (code[i] == ' ' || code[i] == '\n') {
+		i++;
+	}
+	if (code[i] == ';') {
+		i++;
+		return tok_endofline;
+	}
+	if (code[i] == '#') {
+		while (code[i] && code[i] != '\n' && code[i] != EOF) {
+			i++;
+		}
+		return get_token();
+	}
+	if (isalpha(code[i])) {
+		char *id = (char *)malloc(sizeof(char)*1024);
+		int length = 0;
+		while (isdigit(code[i]) || isalpha(code[i])) {
+			id[length++] = code[i++];
+		}
+		if (strcmp(id, "print") == 0) {
+			return tok_print;
+		}
+		return tok_identifier;
+	} else if (isdigit(code[i])) {
+		int value = 0;
+		while (isdigit(code[i])) {
+			value = value * 10 + (code[i++] - '0');
+		}
+		return tok_number;
+	}
+	return 0;
 }
 
 int main() {
-	char *code = "abc = 12 + 23 * 1;";
-	lexer(code);
+	code = "print 1;";
+	while (code[i]) {
+		printf("(token_type = %d)\n", get_token());
+	}
+	/*for (int i = 0; ; i++) {
+		printf("(struct token type=%d attribute=%d)\n", tokens[i].type, tokens[i].attribute);
+	}*/
 }
