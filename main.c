@@ -4,7 +4,7 @@
 #include <ctype.h>
 
 enum token_type {
-	tok_eof = 1,
+	tok_eof = -1,
 	tok_print = 2,
 	tok_read = 3,
 	tok_identifier = 4,
