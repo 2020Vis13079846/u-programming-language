@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include "stdio"
 
 fn test() {
-  print "Hello, world!";
+  print("Hello, world!");
   read();
 }
 
 a = 1 + 2;
-print a;
+print(a);
