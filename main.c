@@ -67,7 +67,7 @@ int get_token() {
 		//printf("%d\n", value);
 		return tok_number;
 	}
-	return code[i++];
+	return (code[i] ? code[i++] : tok_eof);
 }
 
 int main() {
