@@ -1,9 +1,8 @@
-#include "stdio"
+import std;
 
-fn test() {
-  print("Hello, world!");
-  read();
+fn main() {
+  text = "Hello, world!";
+  std.print(text);
 }
 
-a = 1 + 2;
-print(a);
+main();
