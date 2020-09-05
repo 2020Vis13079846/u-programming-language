@@ -12,4 +12,4 @@
 *.so
 
 # Executables
-u
+build/u{,.exe}
