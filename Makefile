@@ -1,10 +1,11 @@
 all: clean build test
 
 build:
-	@gcc main.c -o u
+	@mkdir -p build
+	@gcc main.c -o ./build/u
 
 test:
-	@./u
+	@./build/u
 
 clean:
-	@rm -f u
+	@rm -fr ./build
