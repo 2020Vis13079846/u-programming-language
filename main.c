@@ -6,7 +6,8 @@
 enum token_type {
 	tok_eof = -1,
 	tok_number = -2,
-	tok_plus = -3
+	tok_plus = -3,
+	tok_minus = -4
 };
 
 struct token {
@@ -18,7 +19,7 @@ int i = 0;
 char *code;
 
 char *operators[] = {
-	"+"
+	"+", "-"
 };
 
 /* Lexer */
@@ -60,40 +61,49 @@ struct token *current_token;
 void eat(int token_type) {
 	if (current_token->type == token_type) {
 		current_token = get_next_token();
+	} else {
+		printf("(parser) error while parsing\n");
 	}
 }
 
+int term() {
+	struct token *token = current_token;
+	eat(tok_number);
+	return token->value;
+}
+
 int expr() {
-	int result;
-	struct token *left, *op, *right;
+	int result = 0;
+	struct token *token;
 	current_token = get_next_token();
-	left = current_token;
-	eat(tok_number);
-	op = current_token;
-	eat(tok_plus);
-	right = current_token;
-	eat(tok_number);
-	result = left->value + right->value;
+	result = term();
+	while (current_token->type == tok_plus || current_token->type == tok_minus) {
+		token = current_token;
+		if (token->type == tok_plus) {
+			eat(tok_plus);
+			result = result + term();
+		} else if (token->type == tok_minus) {
+			eat(tok_minus);
+			result = result - term();
+		}
+	}
 	return result;
 }
 
 /* Interpreter */
 
 int main(int argc, char *argv[]) {
-	FILE *file = fopen("test.u", "r");
-	int size;
-	struct token *tok;
-	fseek(file, 0, SEEK_END);
-	size = ftell(file);
-	rewind(file);
-	code = (char *)malloc(sizeof(char)*size);
-	fread(code, size-1, sizeof(char), file);
+	/*code = (char *)malloc(sizeof(char)*1024);
+	memset(code, 0, sizeof(char)*1024);
+	fgets(code, 1024, stdin);
+	code[strlen(code)-1] = 0;*/
+	code = "12+12";
 	current_token = get_next_token();
 	printf("--- Source code -------------\n");
 	printf("%s\n", code);
 	printf("--- Lexer -------------------\n");
 	while (current_token->type != tok_eof) {
-		printf("%d = '%c'\n", current_token->value, current_token->value);
+		printf("%d = '%c'\n", current_token->value, (current_token->type == tok_number ? 0 : current_token->value));
 		current_token = get_next_token();
 	}
 	i = 0;
