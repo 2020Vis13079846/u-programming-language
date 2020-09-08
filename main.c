@@ -9,7 +9,9 @@ enum token_type {
 	tok_plus = -3,
 	tok_minus = -4,
 	tok_mul = -5,
-	tok_div = -6
+	tok_div = -6,
+	tok_lparen = -7,
+	tok_rparen = -8
 };
 
 struct token {
@@ -21,7 +23,7 @@ int i = 0;
 char *code;
 
 char *operators[] = {
-	"+", "-", "*", "/"
+	"+", "-", "*", "/", "(", ")"
 };
 
 /* Lexer */
@@ -60,6 +62,10 @@ struct token *get_next_token() {
 
 struct token *current_token;
 
+int factor();
+int term();
+int expr();
+
 void eat(int token_type) {
 	if (current_token->type == token_type) {
 		current_token = get_next_token();
@@ -69,9 +75,17 @@ void eat(int token_type) {
 }
 
 int factor() {
+	int result;
 	struct token *token = current_token;
-	eat(tok_number);
-	return token->value;
+	if (token->type == tok_number) {
+		eat(tok_number);
+		return token->value;
+	} else if (token->type == tok_lparen) {
+		eat(tok_lparen);
+		result = expr();
+		eat(tok_rparen);
+		return result;
+	}
 }
 
 int term() {
@@ -93,7 +107,6 @@ int term() {
 int expr() {
 	int result = 0;
 	struct token *token;
-	current_token = get_next_token();
 	result = term();
 	while (current_token->type == tok_plus || current_token->type == tok_minus) {
 		token = current_token;
@@ -115,7 +128,7 @@ int main(int argc, char *argv[]) {
 	memset(code, 0, sizeof(char)*1024);
 	fgets(code, 1024, stdin);
 	code[strlen(code)-1] = 0;*/
-	code = "14 + 2 * 3 - 6 / 2";
+	code = "12 * (12 + 2)";
 	current_token = get_next_token();
 	printf("--- Source code -------------\n");
 	printf("%s\n", code);
@@ -124,8 +137,9 @@ int main(int argc, char *argv[]) {
 		printf("%d = '%c'\n", current_token->value, (current_token->type == tok_number ? 0 : current_token->value));
 		current_token = get_next_token();
 	}
-	i = 0;
 	printf("--- Parser ------------------\n");
+	i = 0;
+	current_token = get_next_token();
 	printf("result = %d\n", expr());
 	printf("-----------------------------\n");
 	free(current_token);
