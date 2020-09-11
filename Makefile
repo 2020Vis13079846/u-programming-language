@@ -34,7 +34,7 @@ directories:
 	$(Q) mkdir -p $(patsubst %,"./%",$(DIRECTORIES))
 
 $(BINFILE): $(OBJS)
-	$(Q) $(CC) $(OBJS) -o $(BUILD_DIR)/$(BINFILE) $(CFLAGS)
+	$(Q) $(CC) $(patsubst %.o,./$(BUILD_DIR)/%.o,$(OBJS)) -o $(BUILD_DIR)/$(BINFILE) $(CFLAGS)
 
 test:
 	$(Q) $(BUILD_DIR)/$(BINFILE)
