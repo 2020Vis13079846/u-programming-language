@@ -25,7 +25,7 @@ CFLAGS      = -std=c89 -Wall -Wextra -Werror -pedantic-errors
 
 # Sources
 
-SOURCES    += $(shell find -name "*.c" -print -type f)
+SOURCES    += $(shell find . -name "*.c" -print -type f)
 OBJS       := $(patsubst %.c, %.o, $(SOURCES))
 
 all: clean directories $(BINFILE) test
