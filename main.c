@@ -34,7 +34,19 @@ typedef enum _token_type {
     tok_mul = -5,
     tok_div = -6,
     tok_lparen = -7,
-    tok_rparen = -8
+    tok_rparen = -8,
+    tok_lbrace = -9,
+    tok_rbrace = -10,
+    tok_less = -11,
+    tok_greater = -12,
+    tok_equal = -13,
+    tok_not_equal = -14,
+    tok_less_equal = -15,
+    tok_greater_equal = -16,
+    tok_not = -17,
+    tok_and = -18,
+    tok_or = -19,
+    tok_comma = -20
 } token_type;
 
 typedef struct _token {
@@ -46,7 +58,9 @@ int i;
 char *code;
 
 char *operators[] = {
-    "+", "-", "*", "/", "(", ")"
+    "+", "-", "*", "/", "(", ")", "{", "}", "<",
+    ">", "==", "!=", "<=", ">=", "!", "&&", "||",
+    ","
 };
 
 /* Lexer */
@@ -188,7 +202,7 @@ expr()
 int
 main()
 {
-    code = "12 * (12 + 2)";
+    code = "1 * 0";
     i = 0;
     current_token = get_next_token();
     printf("result = %d\n", expr());
