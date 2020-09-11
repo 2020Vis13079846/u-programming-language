@@ -1,146 +1,196 @@
+/*
+ * Copyright (c) 2020 Simon Chaykin.
+ * All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-enum token_type {
-	tok_eof = -1,
-	tok_number = -2,
-	tok_plus = -3,
-	tok_minus = -4,
-	tok_mul = -5,
-	tok_div = -6,
-	tok_lparen = -7,
-	tok_rparen = -8
-};
+typedef enum _token_type {
+    tok_eof = -1,
+    tok_number = -2,
+    tok_plus = -3,
+    tok_minus = -4,
+    tok_mul = -5,
+    tok_div = -6,
+    tok_lparen = -7,
+    tok_rparen = -8
+} token_type;
 
-struct token {
-	int type;
-	int value;
-};
+typedef struct _token {
+    int type;
+    int value;
+} token;
 
-int i = 0;
+int i;
 char *code;
 
 char *operators[] = {
-	"+", "-", "*", "/", "(", ")"
+    "+", "-", "*", "/", "(", ")"
 };
 
 /* Lexer */
 
-struct token *get_next_token() {
-	struct token *tok = (struct token *)malloc(sizeof(struct token));
-	memset(tok, 0, sizeof(struct token));
-	tok->type = tok_eof;
-	tok->value = 0;
-	if (!code[i]) {
-		return tok;
-	}
-	while (code[i] == ' ' || code[i] == '\n') i++;
-	if (isdigit(code[i])) {
-		int power = 1;
-		int f = 0;
-		while (isdigit(code[i])) {
-			f = f * 10 + (code[i++] - '0');
-		}
-		tok->type = tok_number;
-		tok->value = f;
-		return tok;
-	}
-	for (int j = 0; j < sizeof(operators)/sizeof(char *); j++) {
-		if (strncmp(code+i, operators[j], strlen(operators[j])) == 0) {
-			tok->type = -(3+j);
-			tok->value = (int)code[i];
-			i += strlen(operators[j]);
-			return tok;
-		}
-	}
-	return tok;
+token *
+get_next_token()
+{
+    unsigned long j;
+    int value;
+    token *tok = (token *)malloc(sizeof(token));
+    memset(tok, 0, sizeof(token));
+    tok->type = tok_eof;
+    tok->value = 0;
+
+    if (!code[i])
+    {
+        return tok;
+    }
+
+    while (code[i] == ' ' || code[i] == '\n')
+    {
+        i++;
+    }
+
+    if (isdigit(code[i]))
+    {
+        value = 0;
+        while (isdigit(code[i]))
+        {
+            value = value * 10 + (code[i++] - '0');
+        }
+        tok->type = tok_number;
+        tok->value = value;
+        return tok;
+    }
+
+    for (j = 0; j < sizeof(operators)/sizeof(char *); j++)
+    {
+        if (strncmp(code+i, operators[j], strlen(operators[j])) == 0)
+        {
+            tok->type = -(3+j);
+            tok->value = (int)code[i];
+            i += strlen(operators[j]);
+            return tok;
+        }
+    }
+    return tok;
 }
 
 /* Parser */
 
-struct token *current_token;
+token *current_token;
 
 int factor();
 int term();
 int expr();
 
-void eat(int token_type) {
-	if (current_token->type == token_type) {
-		current_token = get_next_token();
-	} else {
-		printf("(parser) error while parsing\n");
-	}
+void
+eat(tok_type)
+    int tok_type;
+{
+    if (current_token->type == tok_type)
+    {
+        current_token = get_next_token();
+        return;
+    }
+    printf("(parser) error while parsing\n");
+    exit(1);
 }
 
-int factor() {
-	int result;
-	struct token *token = current_token;
-	if (token->type == tok_number) {
-		eat(tok_number);
-		return token->value;
-	} else if (token->type == tok_lparen) {
-		eat(tok_lparen);
-		result = expr();
-		eat(tok_rparen);
-		return result;
-	}
+int
+factor()
+{
+    int result;
+    token *tok = current_token;
+    if (tok->type == tok_number)
+    {
+        eat(tok_number);
+        return tok->value;
+    }
+    if (tok->type == tok_lparen)
+    {
+        eat(tok_lparen);
+        result = expr();
+        eat(tok_rparen);
+        return result;
+    }
+    printf("(parser) error in factor\n");
+    exit(2);
 }
 
-int term() {
-	struct token *token;
-	int result = factor();
-	while (current_token->type == tok_mul || current_token->type == tok_div) {
-		token = current_token;
-		if (token->type == tok_mul) {
-			eat(tok_mul);
-			result = result * factor();
-		} else if (token->type == tok_div) {
-			eat(tok_div);
-			result = result / factor();
-		}
-	}
-	return result;
+int
+term()
+{
+    token *tok;
+    int result = factor();
+    while (current_token->type == tok_mul || current_token->type == tok_div)
+    {
+        tok = current_token;
+        if (tok->type == tok_mul)
+        {
+            eat(tok_mul);
+            result = result * factor();
+        }
+        else if (tok->type == tok_div)
+        {
+            eat(tok_div);
+            result = result / factor();
+        }
+    }
+    return result;
 }
 
-int expr() {
-	int result = 0;
-	struct token *token;
-	result = term();
-	while (current_token->type == tok_plus || current_token->type == tok_minus) {
-		token = current_token;
-		if (token->type == tok_plus) {
-			eat(tok_plus);
-			result = result + term();
-		} else if (token->type == tok_minus) {
-			eat(tok_minus);
-			result = result - term();
-		}
-	}
-	return result;
+int
+expr()
+{
+    int result = 0;
+    token *tok;
+    result = term();
+    while (current_token->type == tok_plus || current_token->type == tok_minus)
+    {
+        tok = current_token;
+        if (tok->type == tok_plus)
+        {
+            eat(tok_plus);
+            result = result + term();
+        }
+        else if (tok->type == tok_minus)
+        {
+            eat(tok_minus);
+            result = result - term();
+        }
+    }
+    return result;
 }
 
 /* Interpreter */
 
-int main(int argc, char *argv[]) {
-	/*code = (char *)malloc(sizeof(char)*1024);
-	memset(code, 0, sizeof(char)*1024);
-	fgets(code, 1024, stdin);
-	code[strlen(code)-1] = 0;*/
-	code = "12 * (12 + 2)";
-	current_token = get_next_token();
-	printf("--- Source code -------------\n");
-	printf("%s\n", code);
-	printf("--- Lexer -------------------\n");
-	while (current_token->type != tok_eof) {
-		printf("%d = '%c'\n", current_token->value, (current_token->type == tok_number ? 0 : current_token->value));
-		current_token = get_next_token();
-	}
-	printf("--- Parser ------------------\n");
-	i = 0;
-	current_token = get_next_token();
-	printf("result = %d\n", expr());
-	printf("-----------------------------\n");
-	free(current_token);
+int
+main()
+{
+    code = "12 * (12 + 2)";
+    i = 0;
+    current_token = get_next_token();
+    printf("result = %d\n", expr());
+    return 0;
 }
