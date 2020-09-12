@@ -13,3 +13,4 @@
 
 # Executables
 build/u{,.exe}
+build/
