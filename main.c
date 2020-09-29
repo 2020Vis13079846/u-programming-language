@@ -46,7 +46,8 @@ typedef enum _token_type {
     tok_not = -17,
     tok_and = -18,
     tok_or = -19,
-    tok_comma = -20
+    tok_comma = -20,
+    tok_dot_comma = -21 /* maybe for C-style (idk) */
 } token_type;
 
 typedef struct _token {
@@ -60,13 +61,12 @@ char *code;
 char *operators[] = {
     "+", "-", "*", "/", "(", ")", "{", "}", "<",
     ">", "==", "!=", "<=", ">=", "!", "&&", "||",
-    ","
+    ",", ";"
 };
 
 /* Lexer */
 
-token *
-get_next_token()
+token *get_next_token()
 {
     unsigned long j;
     int value;
@@ -118,8 +118,7 @@ int factor();
 int term();
 int expr();
 
-void
-eat(tok_type)
+void eat(tok_type)
     int tok_type;
 {
     if (current_token->type == tok_type)
@@ -131,8 +130,7 @@ eat(tok_type)
     exit(1);
 }
 
-int
-factor()
+int factor()
 {
     int result;
     token *tok = current_token;
@@ -152,8 +150,7 @@ factor()
     exit(2);
 }
 
-int
-term()
+int term()
 {
     token *tok;
     int result = factor();
@@ -174,8 +171,7 @@ term()
     return result;
 }
 
-int
-expr()
+int expr()
 {
     int result = 0;
     token *tok;
@@ -199,8 +195,7 @@ expr()
 
 /* Interpreter */
 
-int
-main()
+int main()
 {
     code = "1 * 0";
     i = 0;
